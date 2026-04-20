@@ -1,0 +1,1774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HL Concepts — Hospitality Group</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,600&family=Source+Sans+3:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink:      #141518;
+      --ink-deep: #0e0f11;
+      --ink-soft: #1e1f23;
+      --ink-mid:  #2a2b30;
+      --smoke:    #5a5b60;
+      --mist:     #9a9b9f;
+      --white:    #ffffff;
+      --beige:    #cca77a;
+      --beige-lo: rgba(204,167,122,0.12);
+      --beige-md: rgba(204,167,122,0.35);
+      --white-lo: rgba(255,255,255,0.06);
+      --white-md: rgba(255,255,255,0.18);
+      --sb-w-closed: 120px;
+      --sb-w-open:   300px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; font-size: 16px; }
+
+    body {
+      background: var(--ink);
+      color: var(--white);
+      font-family: 'Source Sans 3', sans-serif;
+      font-weight: 300;
+      line-height: 1.72;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Grain */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 9998;
+      pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+      opacity: 0.4;
+    }
+
+    img { display: block; max-width: 100%; }
+
+    /* ─── SIDEBAR ─── */
+    .sidebar {
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 900;
+      width: var(--sb-w-closed);
+      background: #0f0f0f;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      transition: width 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+    }
+
+    .sidebar.open {
+      width: var(--sb-w-open);
+    }
+
+    /* Logo area */
+    .sb-logo {
+      position: relative;
+      height: 110px;
+      flex-shrink: 0;
+      overflow: hidden;
+      transition: height 0.45s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    .sidebar.open .sb-logo {
+      height: 180px;
+    }
+
+    /* Icon mark — visible in both open and closed state */
+    .sb-logo-icon {
+      position: absolute;
+      top: 18px;
+      left: 14px;
+      height: 86px;
+      width: auto;
+      opacity: 1;
+      transform-origin: top left;
+      transition: opacity 0.25s ease, transform 0.45s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    .sidebar.open .sb-logo-icon {
+      transform: scale(1.3);
+    }
+
+    /* Horizontal logo — always hidden */
+    .sb-logo-horiz {
+      display: none;
+    }
+
+
+    /* Nav content */
+    .sb-nav {
+      flex: 1;
+      overflow: hidden;
+      opacity: 0;
+      padding: 36px 28px 0;
+      transition: opacity 0.25s ease;
+      pointer-events: none;
+    }
+
+    .sidebar.open .sb-nav {
+      opacity: 1;
+      pointer-events: auto;
+      transition-delay: 0.2s;
+    }
+
+    /* Accordion */
+    .sb-accordion {
+    }
+
+    .sb-acc-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      padding: 12px 0 5px;
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 16px;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      line-height: 1;
+      color: var(--white);
+      cursor: pointer;
+      user-select: none;
+      border-bottom: 1px solid rgba(255,255,255,1);
+    }
+
+    .sb-acc-toggle {
+      background: none;
+      border: none;
+      color: var(--white);
+      font-size: 40px;
+      cursor: pointer;
+      padding: 0;
+      line-height: 1;
+      position: relative;
+      top: 3px;
+      opacity: 0.65;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 300;
+      transition: opacity 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .sb-acc-toggle:hover { opacity: 1; }
+
+    .sb-acc-body {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 14px 0 22px;
+      overflow: hidden;
+      max-height: 180px;
+      transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                  opacity 0.3s ease,
+                  padding 0.3s ease;
+    }
+
+    .sb-acc-body.collapsed {
+      max-height: 0;
+      opacity: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+
+    .sb-acc-body a {
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 15.5px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: var(--white);
+      text-decoration: none;
+      transition: color 0.25s ease;
+    }
+
+    .sb-acc-body a:hover { color: var(--beige); }
+
+    /* Toggle button */
+    .sb-toggle {
+      flex-shrink: 0;
+      align-self: flex-start;
+      margin: 0 0 32px 18px;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(255,255,255,0.35);
+      background: transparent;
+      color: var(--white);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      transition: border-color 0.25s ease;
+      font-family: 'Montserrat', sans-serif;
+      line-height: 1;
+    }
+
+    .sidebar.open .sb-toggle {
+      margin-left: 18px;
+    }
+
+    .sb-toggle:hover { border-color: var(--white); }
+
+    .sb-toggle-icon {
+      display: block;
+      transform: translateY(-2px);
+    }
+
+    /* ─── HERO ─── */
+    .hero {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      min-height: 600px;
+      overflow: hidden;
+    }
+
+    /* Slides */
+    .hero-slide {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity 0.9s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .hero-slide.active { opacity: 1; }
+
+    /* Background image */
+    .hero-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scale(1.12);
+      transition: transform 2.2s ease-out;
+    }
+
+    .hero-image.zoom-in { transform: scale(1); }
+
+    /* Slide dark overlay — images are pre-darkened so keep light */
+    .hero-slide::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.18);
+    }
+
+    /* Centered restaurant logo per slide — offset by sidebar width */
+    .hero-slide-logo {
+      position: absolute;
+      top: 0; bottom: 0; right: 0;
+      left: var(--sb-w-current, var(--sb-w-closed));
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      transition: left 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .hero-slide-logo img {
+      width: clamp(220px, 22vw, 320px);
+      height: auto;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.7s ease 0.2s, transform 0.7s ease 0.2s;
+    }
+
+    .hero-slide.active .hero-slide-logo img {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+
+    /* Arrows */
+    .hero-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 3;
+      background: transparent;
+      border: none;
+      color: rgba(255,255,255,0.65);
+      font-size: 44px;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 20px 28px;
+      transition: color 0.25s ease;
+      letter-spacing: 0.05em;
+      line-height: 1;
+    }
+
+    .hero-arrow:hover { color: var(--white); }
+
+    /* Left arrow tracks sidebar width */
+    .hero-prev {
+      left: var(--sb-w-current, var(--sb-w-closed));
+      transition: left 0.45s cubic-bezier(0.4, 0, 0.2, 1), color 0.25s ease;
+    }
+    .hero-next { right: 0; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    /* ─── MARQUEE BAND ─── */
+    .marquee-band {
+      background: var(--beige);
+      overflow: hidden;
+      white-space: nowrap;
+      padding: 14px 0;
+    }
+
+    .marquee-inner {
+      display: inline-flex;
+      animation: marquee 28s linear infinite;
+    }
+
+    .marquee-inner span {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ink);
+      padding: 0 40px;
+    }
+
+    .marquee-inner .sep {
+      opacity: 0.35;
+      padding: 0 4px;
+    }
+
+    @keyframes marquee {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    /* ─── SECTION COMMON ─── */
+    .section-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--beige);
+      margin-bottom: 20px;
+    }
+
+    .section-label::before {
+      content: '';
+      display: block;
+      width: 28px;
+      height: 1px;
+      background: var(--beige);
+    }
+
+    /* ─── INTRO COPY SECTION ─── */
+    .intro-copy {
+      padding: 140px 64px;
+      padding-left: calc(var(--sb-w-closed) + 64px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .intro-copy-inner {
+      max-width: 760px;
+      text-align: center;
+      opacity: 0;
+      filter: blur(12px);
+      transform: scale(1.06) translateY(24px);
+      transition:
+        opacity 1s ease,
+        filter 1.2s ease,
+        transform 1.2s ease;
+      will-change: opacity, filter, transform;
+    }
+
+    .intro-copy-inner.is-visible {
+      opacity: 1;
+      filter: blur(0);
+      transform: scale(1) translateY(0);
+    }
+
+    .intro-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: clamp(1.75rem, 3.5vw, 3.125rem);
+      font-weight: 600;
+      letter-spacing: -0.025em;
+      line-height: 1.15;
+      color: var(--beige);
+      margin-bottom: 32px;
+    }
+
+    .intro-body {
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: clamp(1rem, 1.6vw, 1.5rem);
+      font-weight: 600;
+      line-height: 1.72;
+      color: var(--white);
+    }
+
+    @media (max-width: 768px) {
+      .intro-copy {
+        padding: 100px 32px;
+      }
+    }
+
+    /* ─── VENUES ─── */
+    .venues {
+      background: #1e1f23;
+      margin-left: var(--sb-w-closed);
+    }
+
+    .venue-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 580px;
+    }
+
+    .venue-media {
+      overflow: hidden;
+      position: relative;
+    }
+
+    .venue-media video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .venue-text {
+      padding: 80px 72px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background: #1e1f23;
+    }
+
+    .venue-logo {
+      width: clamp(100px, 10vw, 160px);
+      height: auto;
+      margin-bottom: 24px;
+    }
+
+    .venue-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: clamp(1.25rem, 2vw, 2.1875rem);
+      font-weight: 300;
+      line-height: 1.25;
+      color: var(--white);
+      letter-spacing: -0.015em;
+      margin-bottom: 24px;
+    }
+
+    .venue-body {
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 17px;
+      font-weight: 400;
+      line-height: 1.72;
+      color: var(--white);
+      margin-bottom: 36px;
+    }
+
+    .venue-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--beige);
+      text-decoration: none;
+      transition: gap 0.3s ease;
+    }
+
+    .venue-link:hover { gap: 16px; }
+    .venue-link .arr {
+      font-size: 18px;
+      line-height: 1;
+      position: relative;
+      top: -2px;
+      transition: transform 0.3s ease;
+    }
+    .venue-link:hover .arr { transform: translateX(6px); }
+
+    /* ─── RULE ─── */
+    .rule {
+      width: 100%;
+      height: 1px;
+      background: var(--white-lo);
+    }
+
+    /* ─── ABOUT ─── */
+    .about {
+      padding: 148px 64px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 100px;
+      align-items: center;
+    }
+
+    .about-quote {
+      font-family: 'Montserrat', sans-serif;
+      font-size: clamp(26px, 3vw, 40px);
+      font-weight: 300;
+      font-style: italic;
+      line-height: 1.32;
+      letter-spacing: -0.015em;
+      color: var(--white);
+      margin-bottom: 44px;
+    }
+
+    .about-quote strong {
+      font-style: normal;
+      color: var(--beige);
+      font-weight: 300;
+    }
+
+    .about-body {
+      font-size: 15px;
+      font-weight: 300;
+      line-height: 1.8;
+      color: var(--mist);
+      margin-bottom: 20px;
+    }
+
+    .about-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 28px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--white);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+      padding-bottom: 4px;
+      transition: color 0.3s ease, border-color 0.3s ease;
+    }
+
+    .about-link:hover {
+      color: var(--beige);
+      border-color: var(--beige);
+    }
+
+    .about-link .arr { transition: transform 0.3s ease; }
+    .about-link:hover .arr { transform: translateX(4px); }
+
+    .about-imagery {
+      position: relative;
+      padding-bottom: 60px;
+    }
+
+    .about-img-main {
+      width: 100%;
+      aspect-ratio: 4/5;
+      object-fit: cover;
+      background:
+        radial-gradient(ellipse 65% 45% at 60% 30%, rgba(170,120,50,0.2) 0%, transparent 55%),
+        linear-gradient(150deg, #261e14 0%, #1e1810 55%, #1a1510 100%);
+    }
+
+    .about-img-inset {
+      position: absolute;
+      width: 52%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      bottom: 0;
+      left: -48px;
+      border: 6px solid var(--ink);
+      box-shadow:
+        0 24px 60px rgba(0,0,0,0.5),
+        0 0 0 1px rgba(204,167,122,0.08);
+      background:
+        radial-gradient(ellipse 70% 55% at 45% 35%, rgba(90,110,130,0.15) 0%, transparent 55%),
+        linear-gradient(140deg, #161b22 0%, #181c22 50%, #161a20 100%);
+    }
+
+    .about-tag {
+      position: absolute;
+      top: 36px;
+      right: -32px;
+      background: var(--ink-deep);
+      border: 1px solid rgba(204,167,122,0.25);
+      padding: 22px 28px;
+      text-align: center;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+    }
+
+    .about-tag-year {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 44px;
+      font-weight: 300;
+      color: var(--beige);
+      line-height: 1;
+      display: block;
+    }
+
+    .about-tag-label {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+      margin-top: 8px;
+      display: block;
+    }
+
+    /* ─── VALUES ─── */
+    .values {
+      padding: 148px 64px;
+      background: var(--ink-soft);
+    }
+
+    .values-head {
+      text-align: center;
+      margin-bottom: 88px;
+    }
+
+    .values-head .section-label {
+      display: flex;
+      justify-content: center;
+    }
+
+    .values-head .section-label::before,
+    .values-head .section-label::after {
+      content: '';
+      display: block;
+      width: 28px;
+      height: 1px;
+      background: var(--beige);
+    }
+
+    .values-head .section-label::before { display: block; }
+
+    .values-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: clamp(30px, 3.5vw, 46px);
+      font-weight: 300;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: var(--white);
+    }
+
+    .values-title em {
+      font-style: italic;
+      color: var(--beige);
+    }
+
+    .values-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: rgba(255,255,255,0.05);
+    }
+
+    .v-item {
+      background: var(--ink-soft);
+      padding: 52px 36px;
+      position: relative;
+      transition: background 0.5s ease;
+    }
+
+    .v-item:hover { background: rgba(204,167,122,0.04); }
+
+    .v-num {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 72px;
+      font-weight: 700;
+      color: rgba(204,167,122,0.11);
+      line-height: 1;
+      letter-spacing: -0.03em;
+      margin-bottom: 28px;
+      user-select: none;
+    }
+
+    .v-bar {
+      width: 28px;
+      height: 2px;
+      background: var(--beige);
+      margin-bottom: 20px;
+      transition: width 0.4s cubic-bezier(0.16,1,0.3,1);
+    }
+
+    .v-item:hover .v-bar { width: 56px; }
+
+    .v-name {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--white);
+      margin-bottom: 14px;
+    }
+
+    .v-desc {
+      font-size: 14px;
+      font-weight: 300;
+      line-height: 1.75;
+      color: var(--mist);
+    }
+
+    /* ─── TEAM ─── */
+    .team-section {
+      background: var(--ink);
+      margin-left: var(--sb-w-closed);
+      padding: 120px 80px;
+    }
+
+    .team-eyebrow {
+      text-align: center;
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--beige);
+      margin-bottom: 16px;
+    }
+
+    .team-heading {
+      text-align: center;
+      font-family: 'Montserrat', sans-serif;
+      font-size: clamp(2rem, 3.5vw, 3.25rem);
+      font-weight: 300;
+      letter-spacing: -0.025em;
+      color: var(--white);
+      margin-bottom: 100px;
+    }
+
+    /* Founder row */
+    .team-founder {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto 100px;
+    }
+
+    .team-founder-text {}
+
+    .team-founder-label {
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--beige);
+      margin-bottom: 10px;
+    }
+
+    .team-founder-name {
+      font-family: 'Montserrat', sans-serif;
+      font-size: clamp(1.75rem, 2.8vw, 2.75rem);
+      font-weight: 300;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: var(--white);
+      margin-bottom: 6px;
+    }
+
+    .team-founder-title {
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 13px;
+      font-weight: 400;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--white);
+      margin-bottom: 32px;
+    }
+
+    .team-founder-body {
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 1.78;
+      color: var(--white);
+    }
+
+    .team-founder-body p + p { margin-top: 18px; }
+
+    .team-founder-photo {
+      position: relative;
+    }
+
+    .team-founder-photo img {
+      width: 90%;
+      aspect-ratio: 3/4;
+      object-fit: cover;
+      object-position: center 25%;
+      display: block;
+    }
+
+    .team-founder-photo::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 55%, rgba(20,21,24,0.6) 100%);
+      pointer-events: none;
+    }
+
+    /* Team divider */
+    .team-divider {
+      width: 60px;
+      height: 1px;
+      background: rgba(204,167,122,0.4);
+      margin: 0 auto 80px;
+    }
+
+    /* Team grid */
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 48px 40px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .team-card {}
+
+    .team-card-photo {
+      width: 100%;
+      aspect-ratio: 3/4;
+      object-fit: cover;
+      object-position: center 30%;
+      display: block;
+      margin-bottom: 20px;
+      filter: grayscale(15%);
+      transition: filter 0.4s ease, transform 0.4s ease;
+    }
+
+    .team-card:hover .team-card-photo {
+      filter: grayscale(0%);
+      transform: scale(1.01);
+    }
+
+    .team-card-wrap {
+      overflow: hidden;
+    }
+
+    .team-card-name {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--white);
+      margin-bottom: 4px;
+    }
+
+    .team-card-role {
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 12px;
+      font-weight: 400;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--white);
+    }
+
+    /* ─── PRESS ─── */
+    .press-section {
+      background: var(--ink);
+      margin-left: var(--sb-w-closed);
+      padding: 120px 80px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .press-heading {
+      font-family: 'Montserrat', sans-serif;
+      font-size: clamp(2rem, 3.5vw, 3.25rem);
+      font-weight: 300;
+      letter-spacing: -0.025em;
+      color: var(--white);
+      margin-bottom: 64px;
+      text-align: center;
+    }
+
+    .press-list {
+      width: 100%;
+      max-width: 1100px;
+    }
+
+    .press-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 40px;
+      padding: 28px 0;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      text-decoration: none;
+    }
+
+    .press-item:last-child {
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .press-item-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: clamp(15px, 1.4vw, 19px);
+      font-weight: 400;
+      color: var(--white);
+      line-height: 1.4;
+      transition: color 0.3s ease;
+    }
+
+    .press-item:hover .press-item-title { color: var(--beige); }
+
+    .press-item-cta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.35);
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: color 0.3s ease;
+    }
+
+    .press-item:hover .press-item-cta { color: var(--beige); }
+
+    .press-item-cta .arr-diag {
+      font-size: 14px;
+      line-height: 1;
+    }
+
+    /* ─── GALLERY ─── */
+    .gallery {
+      display: grid;
+      grid-template-columns: 2.1fr 1fr 1fr;
+      grid-template-rows: 380px 380px;
+      gap: 3px;
+    }
+
+    .g-item {
+      overflow: hidden;
+      position: relative;
+    }
+
+    .g-item:first-child {
+      grid-row: 1 / 3;
+    }
+
+    .g-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 1s cubic-bezier(0.16,1,0.3,1);
+    }
+
+    /* Gallery tonal variety */
+    .g-item:nth-child(1) { background: radial-gradient(ellipse 80% 60% at 55% 35%, #221c14, #141210); }
+    .g-item:nth-child(2) { background: radial-gradient(ellipse 80% 60% at 40% 40%, #1e1c18, #161412); }
+    .g-item:nth-child(3) { background: radial-gradient(ellipse 80% 60% at 60% 30%, #181c20, #141618); }
+    .g-item:nth-child(4) { background: radial-gradient(ellipse 80% 60% at 50% 40%, #201a14, #181410); }
+    .g-item:nth-child(5) { background: radial-gradient(ellipse 80% 60% at 45% 35%, #1c1814, #181412); }
+
+    .g-item:hover img { transform: scale(1.05); }
+
+    .g-cap {
+      position: absolute;
+      bottom: 20px; left: 20px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .g-item:hover .g-cap { opacity: 1; }
+
+    /* ─── PULL QUOTE ─── */
+    .pull-quote {
+      padding: 112px 64px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .pull-quote::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(204,167,122,0.05) 0%, transparent 100%);
+      pointer-events: none;
+    }
+
+    .pull-quote blockquote {
+      font-family: 'Montserrat', sans-serif;
+      font-size: clamp(22px, 2.8vw, 38px);
+      font-weight: 300;
+      font-style: italic;
+      line-height: 1.42;
+      letter-spacing: -0.01em;
+      color: var(--white);
+      max-width: 780px;
+      margin: 0 auto 24px;
+    }
+
+    .pull-quote cite {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--beige);
+      font-style: normal;
+    }
+
+    .quote-ornament {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 120px;
+      font-weight: 700;
+      color: rgba(204,167,122,0.06);
+      line-height: 0.7;
+      position: absolute;
+      top: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      pointer-events: none;
+      user-select: none;
+      letter-spacing: -0.05em;
+    }
+
+    /* ─── FOOTER (combined email + nav) ─── */
+    .site-footer {
+      background: #0f0f0f;
+      margin-left: var(--sb-w-closed);
+      padding: 88px 80px 52px;
+    }
+
+    .footer-email-block {
+      margin-bottom: 72px;
+    }
+
+    .footer-email-heading {
+      font-family: 'Montserrat', sans-serif;
+      font-size: clamp(1.75rem, 3vw, 2.75rem);
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      color: var(--white);
+      max-width: 700px;
+      margin-bottom: 40px;
+    }
+
+    .footer-email-form {
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.25);
+      padding-bottom: 16px;
+      max-width: 680px;
+    }
+
+    .footer-email-form input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 15px;
+      font-weight: 300;
+      color: var(--white);
+      letter-spacing: 0.02em;
+    }
+
+    .footer-email-form input::placeholder { color: rgba(255,255,255,0.3); }
+
+    .footer-email-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--white);
+      white-space: nowrap;
+      padding: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .footer-email-btn:hover { opacity: 0.65; }
+
+    .footer-email-btn .btn-circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+      transition: border-color 0.3s ease, background 0.3s ease;
+    }
+
+    .footer-email-btn:hover .btn-circle {
+      border-color: var(--white);
+      background: rgba(255,255,255,0.06);
+    }
+
+    .footer-nav-row {
+      display: flex;
+      gap: 80px;
+      padding: 56px 0 40px;
+    }
+
+    .footer-nav-col h4 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--beige);
+      margin-bottom: 20px;
+    }
+
+    .footer-nav-col ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .footer-nav-col a {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 14px;
+      font-weight: 400;
+      color: rgba(255,255,255,0.55);
+      text-decoration: none;
+      letter-spacing: 0.01em;
+      transition: color 0.3s ease;
+    }
+
+    .footer-nav-col a:hover { color: var(--white); }
+
+    .footer-bottom-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 32px;
+      border-top: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .footer-copy {
+      font-size: 12px;
+      font-weight: 300;
+      color: rgba(255,255,255,0.2);
+      letter-spacing: 0.03em;
+    }
+
+    .footer-social {
+      display: flex;
+      gap: 28px;
+    }
+
+    .footer-social a {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .footer-social a:hover { color: var(--beige); }
+
+    /* ─── SCROLL REVEAL ─── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(22px);
+      transition:
+        opacity  0.9s cubic-bezier(0.16,1,0.3,1),
+        transform 0.9s cubic-bezier(0.16,1,0.3,1);
+    }
+
+    .reveal.in { opacity: 1; transform: translateY(0); }
+
+    .rd1 { transition-delay: 0.08s; }
+    .rd2 { transition-delay: 0.16s; }
+    .rd3 { transition-delay: 0.24s; }
+    .rd4 { transition-delay: 0.32s; }
+
+    /* ─── RESPONSIVE ─── */
+
+    /* Tablet */
+    @media (max-width: 1100px) {
+      .restaurants, .about, .values, .pull-quote, .email-sec, footer { padding-left: 40px; padding-right: 40px; }
+      .restaurants-grid { grid-template-columns: 1fr; }
+      .r-card-img { aspect-ratio: 16/9; }
+      .about { grid-template-columns: 1fr; gap: 56px; }
+      .about-img-inset { left: -20px; bottom: -36px; }
+      .about-tag { right: 16px; }
+      .values-grid { grid-template-columns: 1fr 1fr; }
+      .gallery {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: repeat(3, 300px);
+      }
+      .g-item:first-child { grid-column: 1/3; grid-row: 1/2; }
+    }
+
+    /* Mobile — sidebar becomes top bar */
+    @media (max-width: 768px) {
+      :root { --sb-w-closed: 0px; }
+
+      /* Closed: horizontal top bar */
+      .sidebar {
+        width: 100% !important;
+        height: 60px;
+        bottom: auto;
+        flex-direction: row;
+        align-items: center;
+        padding: 0 16px 0 20px;
+        transition: height 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+        overflow: hidden;
+      }
+
+      /* Open: full-screen overlay */
+      .sidebar.open {
+        height: 100vh;
+        flex-direction: column;
+        align-items: stretch;
+        padding: 0;
+        overflow-y: auto;
+        border-bottom: none;
+      }
+
+      /* ── Logo ── */
+      .sb-logo {
+        /* override absolute positioning from base */
+        position: static !important;
+        height: auto !important;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        padding: 0 !important;
+        overflow: visible;
+      }
+
+      .sidebar.open .sb-logo {
+        flex: 0 0 auto;
+        display: block;
+        padding: 24px 24px 0 !important;
+      }
+
+      /* Icon mark — always show on mobile, override desktop hide-when-open */
+      /* Mobile: hide icon, show horizontal logo */
+      .sb-logo-icon { display: none !important; }
+
+      .sb-logo-horiz {
+        display: block !important;
+        position: static !important;
+        top: auto !important;
+        left: auto !important;
+        height: 47px !important;
+        width: auto !important;
+        opacity: 1 !important;
+        transition: none !important;
+      }
+
+      .sidebar.open .sb-logo-horiz {
+        height: 55px !important;
+      }
+
+
+      /* ── Nav ── */
+      .sb-nav {
+        width: 100%;
+        padding: 28px 24px 0;
+      }
+
+      /* ── Toggle button ── */
+      .sb-toggle {
+        align-self: center;
+        margin: 0;
+        flex-shrink: 0;
+      }
+
+      /* When open: position × at top-right */
+      .sidebar.open .sb-toggle {
+        position: absolute;
+        top: 14px;
+        right: 16px;
+        align-self: auto;
+        margin: 0;
+      }
+
+      /* ── Hero ── */
+      .hero-prev { left: 0 !important; }
+
+      /* ── Content sections ── */
+      .restaurants, .about, .values, .pull-quote, .email-sec, footer { padding-left: 24px; padding-right: 24px; }
+      .restaurants, .values { padding-top: 80px; padding-bottom: 80px; }
+      .about { padding-top: 80px; padding-bottom: 80px; }
+      .restaurants-header { flex-direction: column; align-items: flex-start; gap: 20px; }
+      .restaurants-desc { text-align: left; max-width: 100%; }
+      .values-grid { grid-template-columns: 1fr; }
+      .gallery { grid-template-columns: 1fr; grid-template-rows: repeat(5, 220px); }
+      .g-item:first-child { grid-column: 1; grid-row: 1; }
+      .site-footer { margin-left: 0; padding: 64px 24px 40px; }
+      .footer-email-heading { font-size: 1.6rem; }
+      .footer-nav-row { flex-wrap: wrap; gap: 40px; }
+      .footer-bottom-bar { flex-direction: column; gap: 16px; text-align: center; }
+      .email-form button { justify-content: center; }
+
+      /* Venues mobile */
+      .venues { margin-left: 0; }
+      .venue-row { grid-template-columns: 1fr; }
+      .venue-media { min-height: 280px; order: -1; }
+      .venue-text { padding: 48px 24px; }
+
+      /* Team mobile */
+      .team-section { margin-left: 0; padding: 80px 24px; }
+      /* Press mobile */
+      .press-section { margin-left: 0; padding: 80px 24px; }
+      .press-item { flex-direction: column; align-items: flex-start; gap: 12px; }
+      .team-founder { grid-template-columns: 1fr; gap: 40px; }
+      .team-founder-photo { order: -1; }
+      .team-grid { grid-template-columns: 1fr 1fr; gap: 32px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SIDEBAR NAV -->
+  <div id="sidebar" class="sidebar" role="navigation" aria-label="Main Navigation">
+
+    <div class="sb-logo">
+      <img class="sb-logo-icon"  src="brand_assets/HL-Concepts-Logo-primary-white.png"    alt="HL Concepts">
+      <img class="sb-logo-horiz" src="brand_assets/HL-Concepts-Logo-horizontal-white.png" alt="HL Concepts">
+    </div>
+
+    <nav class="sb-nav" id="sb-nav" aria-label="Site Navigation">
+      <div class="sb-accordion">
+        <div class="sb-acc-header" id="acc-head-restaurants">
+          <span>Restaurants</span>
+          <button class="sb-acc-toggle" aria-label="Toggle Restaurants" aria-expanded="true">×</button>
+        </div>
+        <div class="sb-acc-body" id="acc-body-restaurants">
+          <a href="#jinjia">Jinjia</a>
+          <a href="#shinbay">Shinbay</a>
+          <a href="#sizzle">Sizzle</a>
+        </div>
+      </div>
+      <div class="sb-accordion">
+        <div class="sb-acc-header" id="acc-head-about">
+          <span>About Us</span>
+          <button class="sb-acc-toggle" aria-label="Toggle About" aria-expanded="true">×</button>
+        </div>
+        <div class="sb-acc-body" id="acc-body-about">
+          <a href="#team">Our People</a>
+          <a href="#press">Selected Press</a>
+          <a href="#contact">Contact Us</a>
+        </div>
+      </div>
+    </nav>
+
+    <button id="sb-toggle" class="sb-toggle" aria-label="Open Menu" aria-expanded="false"><span class="sb-toggle-icon">&#9776;</span></button>
+  </div>
+
+  <!-- HERO SLIDESHOW -->
+  <section class="hero" id="hero" aria-label="Featured Restaurants">
+
+    <!-- Slide 1: Jinjia -->
+    <div class="hero-slide active" data-index="0">
+      <img class="hero-image" src="hero_assets/jinjia-hero.jpg" alt="Jinjia">
+      <div class="hero-slide-logo">
+        <img src="brand_assets/logo-jinjia.svg" alt="Jinjia">
+      </div>
+    </div>
+
+    <!-- Slide 2: Shinbay -->
+    <div class="hero-slide" data-index="1">
+      <img class="hero-image" src="hero_assets/shinbay-hero.jpg" alt="Shinbay">
+      <div class="hero-slide-logo">
+        <img src="brand_assets/logo-shinbay.svg" alt="Shinbay">
+      </div>
+    </div>
+
+    <!-- Slide 3: Sizzle -->
+    <div class="hero-slide" data-index="2">
+      <img class="hero-image" src="hero_assets/sizzle.jpg" alt="Sizzle">
+      <div class="hero-slide-logo">
+        <img src="brand_assets/logo-sizzle.svg" alt="Sizzle">
+      </div>
+    </div>
+
+    <!-- Prev / Next -->
+    <button class="hero-arrow hero-prev" aria-label="Previous slide">&#8592;</button>
+    <button class="hero-arrow hero-next" aria-label="Next slide">&#8594;</button>
+
+  </section>
+
+
+  <!-- INTRO COPY -->
+  <section class="intro-copy" id="intro">
+    <div class="intro-copy-inner">
+      <h2 class="intro-title">We create handcrafted,<br>artisanal magic.</h2>
+      <p class="intro-body">Throughout the ages, food continues to bring us together. Developed by serial restaurateur &amp; master chef Hyunwook Lee, our mission is to make high quality, authentic Asian cuisine accessible to all.</p>
+    </div>
+  </section>
+
+  <!-- VENUES -->
+  <section class="venues" id="restaurants">
+
+    <!-- Row 1: Shinbay — video left, text right --><div id="shinbay"></div>
+    <div class="venue-row">
+      <div class="venue-media">
+        <video autoplay muted loop playsinline>
+          <source src="https://cdn.prod.website-files.com/65e6558dc3199361333ffaf7%2F67ee419c5a0fea1f3cf1471e_mobile-transcode.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="venue-text">
+        <img class="venue-logo" src="brand_assets/logo-shinbay.svg" alt="Shinbay">
+        <h3 class="venue-title">Arizona's first and only Omakase room – by Shinji Kurita</h3>
+        <p class="venue-body">In Japanese, Omakase is roughly translated as "I'll leave it up to you." Shinbay is not just a restaurant; it is a carefully curated dining experience, led by James Beard semifinalist Chef Shinji Kurita. Experience an unforgettable and intimate evening of exotic flavors and dazzling artistry, on your plate.</p>
+        <a href="https://www.shin-bay.com/" target="_blank" rel="noopener" class="venue-link">Visit Restaurant <span class="arr">⟶</span></a>
+      </div>
+    </div>
+
+    <!-- Row 2: Jinjia — text left, video right --><div id="jinjia"></div>
+    <div class="venue-row">
+      <div class="venue-text">
+        <img class="venue-logo" src="brand_assets/logo-jinjia.svg" alt="Jin Jia">
+        <h3 class="venue-title">Masterfully crafted, authentic Korean-Chinese cuisine.</h3>
+        <p class="venue-body">Arizona's first and only premiere Korean-Chinese dining experience. Born from generations of Chinese immigrants living in Korea, authentic traditional Chinese recipes have been adapted to the Korean palate, including unique sauces, flavors, and cooking methods. Dressed in a luxurious and sumptuous setting and a high-class bar and lounge, Jin Jia offers an elevated and memorable dining experience unlike any other.</p>
+        <a href="https://jinjiausa.com/" target="_blank" rel="noopener" class="venue-link">Visit Restaurant <span class="arr">⟶</span></a>
+      </div>
+      <div class="venue-media">
+        <video autoplay muted loop playsinline>
+          <source src="https://jinjiausa.com/videos/hero.mp4" type="video/mp4">
+        </video>
+      </div>
+    </div>
+
+    <!-- Row 3: Sizzle — video left, text right --><div id="sizzle"></div>
+    <div class="venue-row">
+      <div class="venue-media">
+        <video autoplay muted loop playsinline>
+          <source src="https://sizzlekoreanbbq.com/wp-content/uploads/2021/04/1_-Montage-A-16-9-HEVC-trimmed-2.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="venue-text">
+        <img class="venue-logo" src="brand_assets/logo-sizzle.svg" alt="Sizzle">
+        <h3 class="venue-title">Authentic Korean Barbecue – Prime cuts only.</h3>
+        <p class="venue-body">Authentic Korean barbecue with a focus on the freshest Prime meats and ingredients, all grilled right at your table. Gather friends and family for a new and adventurous dining experience ensuring endless unique flavors and centuries of classic Korean culinary techniques.</p>
+        <a href="https://sizzlekoreanbbq.com/" target="_blank" rel="noopener" class="venue-link">Visit Restaurant <span class="arr">⟶</span></a>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- TEAM -->
+  <section class="team-section" id="team">
+    <p class="team-eyebrow">The People Behind the Plates</p>
+    <h2 class="team-heading">Meet Our Team</h2>
+
+    <!-- Founder -->
+    <div class="team-founder">
+      <div class="team-founder-text">
+        <p class="team-founder-label">Founder</p>
+        <h3 class="team-founder-name">Hyunwook Lee</h3>
+        <p class="team-founder-title">Founder &amp; Executive Chef</p>
+        <div class="team-founder-body">
+          <p>Lee was born with a passion for both structural and edible design. He is versed in many styles of dining, with heavy emphasis on Korean, Japanese and Asian Fusion cuisines.</p>
+          <p>With a passion for sharing the highest quality authentic Asian cuisine with the world, Lee is driven to deliver only the best-in-class at each of his restaurants.</p>
+          <p>Having opened six locations of his dining experiences, Lee is at the top of his class when it comes to ambition, and slowing down is not in his forecast.</p>
+        </div>
+      </div>
+      <div class="team-founder-photo">
+        <img src="https://images.squarespace-cdn.com/content/v1/608767efd2599f357f7be74f/ce6ec0ab-7690-42ce-861b-239dec870b20/RKDA+MEDIA_Tim+Chow_HL+Concepts_Headshots_002.jpg?format=2500w" alt="Hyunwook Lee">
+      </div>
+    </div>
+
+    <div class="team-divider"></div>
+
+    <!-- Team grid -->
+    <div class="team-grid">
+      <div class="team-card">
+        <div class="team-card-wrap">
+          <img class="team-card-photo" src="https://images.squarespace-cdn.com/content/v1/608767efd2599f357f7be74f/65d38933-6c50-4319-b95a-dbb28eb23321/RKDA+MEDIA_Tim+Chow_HL+Concepts_Team+Photos_001.png?format=1000w" alt="Kevin Tran">
+        </div>
+        <p class="team-card-name">Kevin Tran</p>
+        <p class="team-card-role">HL Operator</p>
+      </div>
+      <div class="team-card">
+        <div class="team-card-wrap">
+          <img class="team-card-photo" src="https://images.squarespace-cdn.com/content/v1/608767efd2599f357f7be74f/5dda3aec-b11b-4907-88c5-fa5412b6ca1e/RKDA+MEDIA_Tim+Chow_HL+Concepts_Team+Photos_009.png?format=1000w" alt="Jin Woo">
+        </div>
+        <p class="team-card-name">Jin Woo</p>
+        <p class="team-card-role">F&amp;B Director</p>
+      </div>
+      <div class="team-card">
+        <div class="team-card-wrap">
+          <img class="team-card-photo" src="https://images.squarespace-cdn.com/content/v1/608767efd2599f357f7be74f/cfebebbe-5c91-4d62-be62-a18ecff77179/RKDA+MEDIA_Tim+Chow_HL+Concepts_Team+Photos_011.png?format=1000w" alt="Jessica Yun">
+        </div>
+        <p class="team-card-name">Jessica Yun</p>
+        <p class="team-card-role">Accounting Manager</p>
+      </div>
+      <div class="team-card">
+        <div class="team-card-wrap">
+          <img class="team-card-photo" src="https://images.squarespace-cdn.com/content/v1/608767efd2599f357f7be74f/d2d49ef3-ad5a-424a-bdf9-65a9503fd48f/RKDA+MEDIA_Tim+Chow_HL+Concepts_Team+Photos_018.png?format=1000w" alt="Jessika Coulbourne">
+        </div>
+        <p class="team-card-name">Jessika Coulbourne</p>
+        <p class="team-card-role">Controller</p>
+      </div>
+      <div class="team-card">
+        <div class="team-card-wrap">
+          <img class="team-card-photo" src="https://images.squarespace-cdn.com/content/v1/608767efd2599f357f7be74f/44504f61-ace2-4069-92ef-e3cac233e5d2/RKDA+MEDIA_Tim+Chow_HL+Concepts_Team+Photos_016.png?format=1000w" alt="Joshilyn Pete">
+        </div>
+        <p class="team-card-name">Joshilyn Pete</p>
+        <p class="team-card-role">Sizzle Regional Manager</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRESS -->
+  <section class="press-section" id="press">
+    <p class="team-eyebrow">In the News</p>
+    <h2 class="press-heading">Selected Press</h2>
+    <div class="press-list">
+      <a href="#" class="press-item">
+        <span class="press-item-title">Arizona's Best Omakase Experience Is Hidden in Scottsdale</span>
+        <span class="press-item-cta">Read Article <span class="arr-diag">↗</span></span>
+      </a>
+      <a href="#" class="press-item">
+        <span class="press-item-title">The 10 Hottest Restaurants in Phoenix Right Now</span>
+        <span class="press-item-cta">Read Article <span class="arr-diag">↗</span></span>
+      </a>
+      <a href="#" class="press-item">
+        <span class="press-item-title">Hyunwook Lee Is Quietly Building Arizona's Most Ambitious Restaurant Group</span>
+        <span class="press-item-cta">Read Article <span class="arr-diag">↗</span></span>
+      </a>
+      <a href="#" class="press-item">
+        <span class="press-item-title">Korean BBQ Done Right: Sizzle Sets a New Standard in the Valley</span>
+        <span class="press-item-cta">Read Article <span class="arr-diag">↗</span></span>
+      </a>
+      <a href="#" class="press-item">
+        <span class="press-item-title">Jin Jia Named One of Phoenix's Most Anticipated New Openings</span>
+        <span class="press-item-cta">Read Article <span class="arr-diag">↗</span></span>
+      </a>
+    </div>
+  </section>
+
+  <!-- GALLERY -->
+  <section class="gallery" id="gallery" aria-label="Photography">
+    <div class="g-item">
+      <img src="https://placehold.co/840x760/191a1e/191a1e" alt="Jinjia Dining Room">
+      <span class="g-cap">Jinjia Dining Room</span>
+    </div>
+    <div class="g-item">
+      <img src="https://placehold.co/420x380/1c1d21/1c1d21" alt="Seasonal Sourcing">
+      <span class="g-cap">Seasonal Sourcing</span>
+    </div>
+    <div class="g-item">
+      <img src="https://placehold.co/420x380/1a1b1e/1a1b1e" alt="At the Pass, Shinbay">
+      <span class="g-cap">At the Pass — Shinbay</span>
+    </div>
+    <div class="g-item">
+      <img src="https://placehold.co/420x380/1e1f23/1e1f23" alt="Sizzle Terrace">
+      <span class="g-cap">Sizzle</span>
+    </div>
+    <div class="g-item">
+      <img src="https://placehold.co/420x380/202124/202124" alt="The Art of the Plate">
+      <span class="g-cap">The Art of the Plate</span>
+    </div>
+  </section>
+
+  <!-- FOOTER (email + nav combined) -->
+  <footer class="site-footer" id="contact">
+
+    <!-- Email signup -->
+    <div class="footer-email-block">
+      <h2 class="footer-email-heading">Stay up to date on events<br>and exclusive offers.</h2>
+      <form class="footer-email-form" onsubmit="return false;">
+        <input type="email" placeholder="Email Address" aria-label="Email address">
+        <button type="submit" class="footer-email-btn">
+          Sign Me Up
+          <span class="btn-circle">→</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- Nav links -->
+    <nav class="footer-nav-row" aria-label="Footer Navigation">
+      <div class="footer-nav-col">
+        <h4>Restaurants</h4>
+        <ul>
+          <li><a href="#jinjia">Jinjia</a></li>
+          <li><a href="#shinbay">Shinbay</a></li>
+          <li><a href="#sizzle">Sizzle</a></li>
+        </ul>
+      </div>
+      <div class="footer-nav-col">
+        <h4>About Us</h4>
+        <ul>
+          <li><a href="#team">Our People</a></li>
+          <li><a href="#press">Selected Press</a></li>
+          <li><a href="#contact">Contact Us</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Bottom bar -->
+    <div class="footer-bottom-bar">
+      <p class="footer-copy">&copy; 2026 HL Concepts Group. All rights reserved.</p>
+    </div>
+
+  </footer>
+
+  <script>
+    // ─── SIDEBAR ───
+    const sidebar  = document.getElementById('sidebar');
+    const sbToggle = document.getElementById('sb-toggle');
+    let sidebarOpen = false;
+
+    function updateHeroPositions() {
+      const isMobile = window.innerWidth <= 768;
+      const w = isMobile ? 0 : (sidebarOpen ? 300 : 120);
+      document.documentElement.style.setProperty('--sb-w-current', w + 'px');
+    }
+
+    sbToggle.addEventListener('click', () => {
+      sidebarOpen = !sidebarOpen;
+      sidebar.classList.toggle('open', sidebarOpen);
+      sbToggle.innerHTML     = sidebarOpen ? '<span class="sb-toggle-icon">&#10005;</span>' : '<span class="sb-toggle-icon">&#9776;</span>';
+      sbToggle.setAttribute('aria-expanded', sidebarOpen);
+      sbToggle.setAttribute('aria-label', sidebarOpen ? 'Close Menu' : 'Open Menu');
+      updateHeroPositions();
+    });
+
+    window.addEventListener('resize', updateHeroPositions);
+    updateHeroPositions();
+
+    // Close sidebar when scrolled past hero
+    const heroSection = document.getElementById('hero');
+    window.addEventListener('scroll', () => {
+      if (!heroSection) return;
+      const heroBounds = heroSection.getBoundingClientRect();
+      if (heroBounds.bottom < 0 && sidebarOpen) {
+        sidebarOpen = false;
+        sidebar.classList.remove('open');
+        sbToggle.innerHTML = '<span class="sb-toggle-icon">&#9776;</span>';
+        sbToggle.setAttribute('aria-expanded', false);
+        sbToggle.setAttribute('aria-label', 'Open Menu');
+        updateHeroPositions();
+      }
+    }, { passive: true });
+
+    // Blur-zoom scroll reveal
+    document.querySelectorAll('.intro-copy-inner').forEach(el => {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            el.classList.add('is-visible');
+            observer.unobserve(el);
+          }
+        });
+      }, { threshold: 0.25 });
+      observer.observe(el);
+    });
+
+    // Accordion
+    document.querySelectorAll('.sb-acc-header').forEach(header => {
+      const toggle = header.querySelector('.sb-acc-toggle');
+      const body   = header.nextElementSibling;
+
+      function doToggle() {
+        const collapsed = body.classList.toggle('collapsed');
+        toggle.textContent = collapsed ? '+' : '×';
+        toggle.setAttribute('aria-expanded', !collapsed);
+      }
+
+      header.addEventListener('click', doToggle);
+      toggle.addEventListener('click', e => { e.stopPropagation(); doToggle(); });
+    });
+
+    // ─── HERO SLIDESHOW ───
+    const slides   = Array.from(document.querySelectorAll('.hero-slide'));
+    const prevBtn  = document.querySelector('.hero-prev');
+    const nextBtn  = document.querySelector('.hero-next');
+    let current    = 0;
+    let autoTimer  = null;
+
+    function goTo(n) {
+      slides[current].classList.remove('active');
+      current = (n + slides.length) % slides.length;
+
+      // Reset zoom on incoming image so animation replays
+      const img = slides[current].querySelector('.hero-image');
+      if (img) {
+        img.classList.remove('zoom-in');
+        void img.offsetWidth;
+        requestAnimationFrame(() => img.classList.add('zoom-in'));
+      }
+
+      slides[current].classList.add('active');
+    }
+
+    function resetAuto() {
+      clearInterval(autoTimer);
+      autoTimer = setInterval(() => goTo(current + 1), 5000);
+    }
+
+    nextBtn.addEventListener('click', () => { goTo(current + 1); resetAuto(); });
+    prevBtn.addEventListener('click', () => { goTo(current - 1); resetAuto(); });
+
+    resetAuto();
+
+    // ─── HERO ZOOM ON LOAD ───
+    window.addEventListener('load', () => {
+      const heroImage = document.querySelector('.hero-slide.active .hero-image');
+      if (!heroImage) return;
+      requestAnimationFrame(() => heroImage.classList.add('zoom-in'));
+    });
+
+    // ─── SCROLL REVEAL ───
+    const reveals = document.querySelectorAll('.reveal');
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('in'); obs.unobserve(e.target); }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+    reveals.forEach(el => obs.observe(el));
+  </script>
+</body>
+</html>
