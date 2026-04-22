@@ -1282,6 +1282,10 @@
       .about-tag { right: 16px; }
       .values-grid { grid-template-columns: 1fr 1fr; }
       .marquee-item { width: 240px; height: 320px; }
+      @keyframes marqueeScroll {
+        from { transform: translateX(0); }
+        to   { transform: translateX(-2940px); }
+      }
     }
 
     /* Mobile — sidebar becomes top bar */
@@ -1380,6 +1384,10 @@
       .values-grid { grid-template-columns: 1fr; }
       .marquee-section { margin-left: 0; }
       .marquee-item { width: 200px; height: 266px; }
+      @keyframes marqueeScroll {
+        from { transform: translateX(0); }
+        to   { transform: translateX(-2460px); }
+      }
       .site-footer { margin-left: 0; padding: 64px 24px 40px; }
       .footer-main-row { grid-template-columns: 1fr; gap: 48px; }
       .footer-email-heading { font-size: 1.6rem; }
